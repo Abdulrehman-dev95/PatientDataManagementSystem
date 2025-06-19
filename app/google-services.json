@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "493083733072",
+    "project_id": "block-care",
+    "storage_bucket": "block-care.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:493083733072:android:8aa2c1a3cd4d2081f9b555",
+        "android_client_info": {
+          "package_name": "com.example.patientdatamanagementsystem"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBlre_VHVCLjjO7fisjg85seGkFrARHYwM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

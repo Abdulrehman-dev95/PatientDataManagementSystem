@@ -14,31 +14,16 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material3.Button
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -47,21 +32,22 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.patientdatamanagementsystem.R
 import com.example.patientdatamanagementsystem.ui.theme.PatientDataManagementSystemTheme
 import com.example.patientdatamanagementsystem.ui.theme.bodyFontFamily
 
 
 @Composable
-fun LoginScreen(
-    onLogin: (String, String, String) -> Unit,
-    onSignUpClick: () -> Unit
+fun LoginLayout(
+    onLogin: (String, String) -> Unit,
+    onSignUpClick: () -> Unit,
+    loginViewModel: AuthenticationViewModel = viewModel(),
+    onValueChange: (User) -> Unit
 ) {
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    var userType by remember { mutableStateOf("") }
+    val uiState = loginViewModel.uiState
 
-    Column (modifier = Modifier.fillMaxSize()) {
+    Column(modifier = Modifier.fillMaxSize()) {
         Spacer(modifier = Modifier.height(32.dp))
         Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.TopCenter) {
             Image(
@@ -75,8 +61,9 @@ fun LoginScreen(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp).padding(top = 16.dp),
-            verticalArrangement = Arrangement.Center
+                .padding(horizontal = 16.dp)
+                .padding(top = 16.dp),
+            verticalArrangement = Arrangement.Center,
         ) {
 
             Text(
@@ -92,8 +79,14 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(20.dp))
 
             OutlinedTextField(
-                value = email,
-                onValueChange = { email = it },
+                value = uiState.email,
+                onValueChange = {
+                    onValueChange(
+                        uiState.copy(
+                            email = it
+                        )
+                    )
+                },
                 label = { Text("Email") },
                 modifier = Modifier.fillMaxWidth(),
                 leadingIcon = {
@@ -115,8 +108,12 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             OutlinedTextField(
-                value = password,
-                onValueChange = { password = it },
+                value = uiState.password,
+                onValueChange = { onValueChange(
+                    uiState.copy(
+                        password = it
+                    )
+                ) },
                 label = { Text("Password") },
                 visualTransformation = PasswordVisualTransformation(),
                 leadingIcon = {
@@ -143,7 +140,7 @@ fun LoginScreen(
 
 
             FilledTonalButton(
-                onClick = { onLogin(userType, email, password) },
+                onClick = { onLogin(uiState.email, uiState.password) },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Login", fontFamily = bodyFontFamily)
@@ -164,15 +161,14 @@ fun LoginScreen(
 }
 
 
-
-
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun PreviewLoginScreen() {
     PatientDataManagementSystemTheme {
-        LoginScreen(
-            onLogin = { _, _, _ -> },
-            onSignUpClick = {}
+        LoginLayout(
+            onLogin = { _, _ -> },
+            onSignUpClick = {},
+            onValueChange = {}
         )
     }
 
