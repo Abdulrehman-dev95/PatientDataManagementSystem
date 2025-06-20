@@ -46,7 +46,6 @@ class AuthenticationViewModel(
             val authResult = authenticationRepository.signUp(email, password, role)
 
             authResult.onSuccess {
-                appPreferencesRepo.saveRoleLocal(it)
                 _authState.value = 1
 
             }
