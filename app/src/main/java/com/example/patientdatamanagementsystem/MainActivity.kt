@@ -22,5 +22,5 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun PatientDataManagementApp() {
-
+    MainApp()
 }

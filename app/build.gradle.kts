@@ -62,7 +62,7 @@ dependencies {
     implementation ("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
 
     implementation ("androidx.security:security-crypto:1.1.0-alpha07")// Secure storage
-    implementation("org.bouncycastle:bcprov-jdk15to18:1.70")
+
 
     // Firebase
     implementation(platform("com.google.firebase:firebase-bom:33.15.0"))

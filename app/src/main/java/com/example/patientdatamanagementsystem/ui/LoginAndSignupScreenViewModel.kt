@@ -32,21 +32,58 @@ class AuthenticationViewModel(
     private val _authState = MutableStateFlow(0)
     val authState = _authState.asStateFlow()
 
+    var currentRole by mutableStateOf("")
 
-    private suspend fun getUserRole() {
-        val role = appPreferencesRepo.role.first()
-        if (
-            role != ""
-        ) {
-            _authState.value = 1
-        } else {
-            _authState.value = 2
+    fun changeAuthSate(state: Int){
+        _authState.value = state
+    }
+
+     fun signUp(
+        email: String, password: String, role: String
+    ) {
+        viewModelScope.launch {
+            _authState.value = 0
+            val authResult = authenticationRepository.signUp(email, password, role)
+
+            authResult.onSuccess {
+                appPreferencesRepo.saveRoleLocal(it)
+                _authState.value = 1
+
+            }
+            authResult.onFailure {
+                _authState.value = 2
+            }
         }
     }
 
+    fun login(email: String, password: String){
+        viewModelScope.launch {
+
+            _authState.value = 0
+            val authResult = authenticationRepository.loginIn(email, password)
+            authResult.onSuccess {
+                appPreferencesRepo.saveRoleLocal(it)
+                _authState.value = 1
+
+            }
+            authResult.onFailure {
+                _authState.value = 2
+            }
+
+        }
+    }
+
+
+
+
+
+
+
     init {
         viewModelScope.launch {
-            getUserRole()
+          val role = appPreferencesRepo.role.first()
+            currentRole = role
+            _authState.value = 3
         }
     }
 

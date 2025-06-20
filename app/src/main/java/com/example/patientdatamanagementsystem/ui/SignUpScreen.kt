@@ -1,6 +1,7 @@
 package com.example.patientdatamanagementsystem.ui
 
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -31,6 +32,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -45,7 +47,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
 import com.example.patientdatamanagementsystem.R
 import com.example.patientdatamanagementsystem.ui.theme.bodyFontFamily
 
@@ -53,9 +55,15 @@ import com.example.patientdatamanagementsystem.ui.theme.bodyFontFamily
 @Composable
 fun SignupScreen(
     modifier: Modifier = Modifier,
-    signUpViewModel: AuthenticationViewModel = viewModel()
+    signUpViewModel: AuthenticationViewModel,
+    onSignUpClick: (String, String, String) -> Unit,
+    onSignUpRetryClick: () -> Unit,
+    onLoginClick: () -> Unit,
+    navHostController: NavHostController
+
 ) {
     val signupUiState = signUpViewModel.uiState
+    val authState = signUpViewModel.authState.collectAsState()
     Column(modifier = modifier.fillMaxSize()) {
         Spacer(modifier = Modifier.height(32.dp))
         Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.TopCenter) {
@@ -66,11 +74,25 @@ fun SignupScreen(
                 ), contentDescription = null
             )
         }
+        when (authState.value) {
+            0 -> LoadingScreen()
+            1 -> {
+                navHostController.navigate(
+                    Screen.LogIn.route
+                )
+            }
 
-        SignupForm(newUser = signupUiState, onValueChange = {
-            signUpViewModel.updateUiState(it)
-        })
+            2 -> ErrorScreen {
+                onSignUpRetryClick()
+            }
+        }
+        AnimatedVisibility(authState.value != 0 && authState.value != 2) {
+            SignupForm(newUser = signupUiState, onValueChange = {
+                signUpViewModel.updateUiState(it)
+            }, onSignUpClick = onSignUpClick, onLoginClick = onLoginClick)
 
+
+        }
     }
 }
 
@@ -78,8 +100,9 @@ fun SignupScreen(
 fun SignupForm(
     modifier: Modifier = Modifier,
     newUser: User,
-    onSignUpClick: () -> Unit = {},
-    onValueChange: (User) -> Unit
+    onSignUpClick: (String, String, String) -> Unit,
+    onValueChange: (User) -> Unit,
+    onLoginClick: () -> Unit
 ) {
     Column(
         modifier = modifier
@@ -165,14 +188,22 @@ fun SignupForm(
 
 
         FilledTonalButton(
-            onClick = { },
+            onClick = {
+                onSignUpClick(
+                    newUser.email,
+                    newUser.password,
+                    newUser.userType
+                )
+            },
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Login", fontFamily = bodyFontFamily)
+            Text("SignUp", fontFamily = bodyFontFamily)
         }
 
         TextButton(
-            onClick = {},
+            onClick = {
+                onLoginClick()
+            },
             modifier = Modifier.align(Alignment.CenterHorizontally)
         ) {
             Text(
@@ -251,7 +282,9 @@ fun UserTypeDropdown(user: User, onValueChange: (User) -> Unit) {
 @Composable
 fun LoadingScreen(modifier: Modifier = Modifier) {
     Column(
-        modifier = modifier.fillMaxSize(),
+        modifier = modifier
+            .fillMaxSize()
+            .padding(top = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
@@ -261,7 +294,12 @@ fun LoadingScreen(modifier: Modifier = Modifier) {
 
 @Composable
 fun ErrorScreen(modifier: Modifier = Modifier, onRetryClick: () -> Unit) {
-    Column(modifier = modifier.fillMaxSize()) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(top = 16.dp), horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
 
         Text(
             text = "Internet Slow or there is something error",
@@ -282,11 +320,15 @@ fun ErrorScreen(modifier: Modifier = Modifier, onRetryClick: () -> Unit) {
 }
 
 
-
-
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun PreviewSignupScreen() {
-    SignupScreen()
+    SignupScreen(
+        onSignUpClick = { _, _, _ -> },
+        signUpViewModel = TODO(),
+        onSignUpRetryClick = {},
+        onLoginClick = {},
+        navHostController = TODO()
+    )
 
 }
