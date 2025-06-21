@@ -2,6 +2,7 @@ package com.example.patientdatamanagementsystem.data
 
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.tasks.await
 
 
@@ -39,12 +40,15 @@ class FirebaseService(
     suspend fun signUp(
         email: String, password: String, role: String
     ): Result<String> {
+        auth.signOut()
         return try {
             val authResult = auth.createUserWithEmailAndPassword(
                 email, password
             ).await()
             val userId = authResult.user?.uid ?: return Result.failure(Exception("User not found"))
             saveUserRole(userId, role)
+            auth.signOut()
+            delay(100)
             Result.success(role)
         } catch (e: Exception) {
             Result.failure(e)

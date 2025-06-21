@@ -15,15 +15,21 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -63,11 +69,16 @@ fun LoginLayout(
 
         when (authState.value) {
             0 -> LoadingScreen()
-            1 -> {
+            1 -> OnLoginSuccess {
                 navHostController.navigate(
                     Screen.Home.route
-                )
+                ) {
+                    popUpTo(Screen.LogIn.route) {
+                        inclusive = true
+                    }
+                }
             }
+
             2 -> ErrorScreen {
                 onLoginRetryClick()
             }
@@ -77,7 +88,7 @@ fun LoginLayout(
 
 
         AnimatedVisibility(
-            authState.value != 0 && authState.value != 2
+            authState.value == 3
         ) {
             Column(
                 modifier = Modifier
@@ -147,7 +158,7 @@ fun LoginLayout(
                     },
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Password,
-                        imeAction = ImeAction.Next,
+                        imeAction = ImeAction.Done,
                         autoCorrectEnabled = true
                     ), textStyle = LocalTextStyle.current.copy(
                         fontFamily = bodyFontFamily,
@@ -162,7 +173,7 @@ fun LoginLayout(
                 Spacer(modifier = Modifier.height(64.dp))
 
 
-                FilledTonalButton(
+                Button(
                     onClick = { onLogin(uiState.email, uiState.password) },
                     modifier = Modifier.fillMaxWidth()
                 ) {
@@ -181,6 +192,28 @@ fun LoginLayout(
                 }
             }
         }
+    }
+}
+
+@Composable
+fun OnLoginSuccess(onNavigate: () -> Unit) {
+    val rememberSnackBarHostState = remember {
+        SnackbarHostState()
+    }
+
+    LaunchedEffect(Unit) {
+        rememberSnackBarHostState.showSnackbar(
+            message = "Login Successful",
+            duration = SnackbarDuration.Short
+        )
+        onNavigate()
+    }
+    Scaffold(snackbarHost = { SnackbarHost(hostState = rememberSnackBarHostState) }) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(it)
+        )
     }
 }
 

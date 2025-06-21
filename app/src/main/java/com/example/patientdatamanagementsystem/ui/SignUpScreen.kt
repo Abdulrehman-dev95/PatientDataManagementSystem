@@ -3,6 +3,7 @@ package com.example.patientdatamanagementsystem.ui
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -32,6 +34,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -48,8 +51,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.animateLottieCompositionAsState
+import com.airbnb.lottie.compose.rememberLottieComposition
 import com.example.patientdatamanagementsystem.R
 import com.example.patientdatamanagementsystem.ui.theme.bodyFontFamily
+import kotlinx.coroutines.delay
 
 
 @Composable
@@ -76,17 +84,23 @@ fun SignupScreen(
         }
         when (authState.value) {
             0 -> LoadingScreen()
-            1 -> {
+            1 -> SignupSuccessScreen {
+                signUpViewModel.changeAuthSate(3)
                 navHostController.navigate(
                     Screen.LogIn.route
-                )
+                ) {
+                    popUpTo(Screen.SignUp.route) {
+                        inclusive = true
+                    }
+                }
             }
+
 
             2 -> ErrorScreen {
                 onSignUpRetryClick()
             }
         }
-        AnimatedVisibility(authState.value != 0 && authState.value != 2) {
+        AnimatedVisibility(authState.value == 3) {
             SignupForm(newUser = signupUiState, onValueChange = {
                 signUpViewModel.updateUiState(it)
             }, onSignUpClick = onSignUpClick, onLoginClick = onLoginClick)
@@ -317,6 +331,52 @@ fun ErrorScreen(modifier: Modifier = Modifier, onRetryClick: () -> Unit) {
 
     }
 
+}
+
+@Composable
+fun SignupSuccessScreen(onNavigate: () -> Unit) {
+    val composition by rememberLottieComposition(spec = LottieCompositionSpec.RawRes(R.raw.check_mark_animation))
+    val progress by animateLottieCompositionAsState(composition = composition)
+
+    LaunchedEffect(Unit) {
+            delay(3000) // Show success screen for 3 seconds
+            onNavigate()
+    }
+
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.primaryContainer)
+    ) {
+        Column(
+            modifier = Modifier.align(Alignment.Center),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            LottieAnimation(
+                composition = composition,
+                progress = { progress },
+                modifier = Modifier.size(200.dp)
+            )
+
+            Text(
+                text = "Account Created!",
+                style = MaterialTheme.typography.headlineMedium,
+                modifier = Modifier.padding(top = 16.dp)
+            )
+
+            Text(
+                text = "Redirecting to login...",
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.padding(top = 8.dp)
+            )
+
+            CircularProgressIndicator(
+                modifier = Modifier.padding(top = 24.dp),
+                color = MaterialTheme.colorScheme.primary
+            )
+        }
+    }
 }
 
 

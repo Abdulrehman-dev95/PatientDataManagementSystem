@@ -73,7 +73,7 @@ dependencies {
     implementation("androidx.datastore:datastore-preferences:1.1.7")
 
 
-
+    implementation ("com.airbnb.android:lottie-compose:6.1.0")
     implementation(libs.androidx.ui.text.google.fonts)
 
 
