@@ -77,7 +77,7 @@ fun BlockCareNavGraph(
 
 
         composable(Screen.Home.route) {
-            PatientHomeScreen()
+         HealthDashboardScreen()
         }
 
 

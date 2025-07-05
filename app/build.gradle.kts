@@ -63,6 +63,10 @@ dependencies {
 
     implementation ("androidx.security:security-crypto:1.1.0-alpha07")// Secure storage
 
+    implementation(platform("com.reown:android-bom:1.4.2"))
+    implementation("com.reown:android-core")
+    implementation("com.reown:appkit")
+
 
     // Firebase
     implementation(platform("com.google.firebase:firebase-bom:33.15.0"))
@@ -73,7 +77,7 @@ dependencies {
     implementation("androidx.datastore:datastore-preferences:1.1.7")
 
 
-    implementation ("com.airbnb.android:lottie-compose:6.1.0")
+    implementation (libs.lottie.compose)
     implementation(libs.androidx.ui.text.google.fonts)
 
 

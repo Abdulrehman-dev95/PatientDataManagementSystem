@@ -217,8 +217,11 @@ val surfaceContainerDarkHighContrast = Color(0xFF2D3038)
 val surfaceContainerHighDarkHighContrast = Color(0xFF383B43)
 val surfaceContainerHighestDarkHighContrast = Color(0xFF44474E)
 
-
-
+val LightBlueBackground = Color(0xffceebfd) // Approximated from image
+val CardBackgroundColor = Color.White
+val IconColor = Color(0xFF0D47A1) // Darker blue for icons on white cards
+val TextPrimaryColor = Color.Black
+val TextSecondaryColor = Color.Gray
 
 
 
