@@ -1,101 +1,60 @@
 package com.example.patientdatamanagementsystem.data
 
-import android.app.Application
-import com.reown.android.Core
-import com.reown.android.CoreClient
-import com.reown.android.relay.ConnectionType
-import com.reown.appkit.client.AppKit
-import com.reown.appkit.client.Modal
-import kotlinx.coroutines.runBlocking
-import timber.log.Timber
+import android.util.Log
+import io.metamask.androidsdk.EthereumFlow
+import io.metamask.androidsdk.Result
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
-class BlockChain(application: Application) {
-
-    private var walletConnect: Wallet? = null
-
-    init {
-        val connectionType = ConnectionType.AUTOMATIC
-        val projectId = "8f8a16485301cd59643e6c64205e1336"
-        val appMetadata = Core.Model.AppMetaData(
-            name = "BlockCare",
-            description = "A Patient Data Management System",
-            url = "https://yourdomain.com",
-            icons = listOf("https://raw.githubusercontent.com/google/material-design-icons/master/png/social/person/materialicons/48dp/1x/baseline_person_black_48dp.png"),
-            redirect = "patientdatamanagementsystem://wallet-callback",
-        )
+class BlockChain(private val ethereum: EthereumFlow) {
 
 
-        CoreClient.initialize(
-            application = application,
-            projectId = projectId,
-            metaData = appMetadata,
-            connectionType = connectionType,
-            onError = {
-                Timber.tag("CoreClint Error ").e(it.throwable)
-            },
-        )
-
-        AppKit.initialize(
-            init = Modal.Params.Init(CoreClient),
-            onSuccess = {
-                Timber.tag("AppKit Success").i(
-                    "AppKit initialized successfully"
-                )
-            },
-            onError = {
-                Timber.tag("AppKit Error").e(it.throwable)
+    suspend fun connectWallet(): kotlin.Result<String> {
+        return when (val result = ethereum.connect()) {
+            is Result.Success.Item -> {
+                val walletAddress = result.value
+                if (walletAddress.isNotBlank()) {
+                    Log.d("MetaMask", "Connected to wallet")
+                    kotlin.Result.success(
+                        result.value
+                    )
+                } else {
+                    Log.e("MetaMask", "Error connecting to wallet")
+                    kotlin.Result.failure(exception = Exception("Error connecting to wallet"))
+                }
             }
-        )
 
-    }
-
-
-    fun connectWallet(onConnected: (String) -> Unit, onError: (String) -> Unit) {
-        val pairing = CoreClient.Pairing.getPairings().firstOrNull() ?: runBlocking {
-            CoreClient.Pairing.create()
-        }
-        if (pairing == null) {
-            onError("Failed to create WalletConnect pairing.")
-            return
-        }
-
-        AppKit.connect(
-            onSuccess = {
-                walletConnect = Wallet(address = it)
-                onConnected(it)
-            },
-            onError = {
-                onError(it.toString())
-            },
-            connect = Modal.Params.Connect(
-
-                pairing = pairing
-            )
-
-
-        )
-
-
-    }
-
-    fun disconnectWallet() {
-        AppKit.disconnect(
-            onSuccess = {
-                walletConnect = null
-                Timber.tag("Appkit success").i("Appkit is disconnect")
-            }, onError = {
-                Timber.tag("Appkit Error").e("Appkit is not disconnect")
+            is Result.Error -> {
+                Log.e("MetaMask", "Error connecting to wallet ${result.error.message}")
+                kotlin.Result.failure(exception = Exception(result.error.message))
             }
-        )
+
+            else -> {
+                Log.e("MetaMask", "Unknown error")
+                kotlin.Result.failure(exception = Exception("Unknown error please try again"))
+            }
+
+        }
     }
 
-    fun getShortenedAddress(): String {
-        return walletConnect?.address?.let {
-            "${it.take(6)}...${it.takeLast(4)}"
-        } ?: "Not Connected"
+
+    suspend fun disconnectWallet() = withContext(Dispatchers.IO) {
+        ethereum.disconnect(true)
     }
+
+//    suspend fun getAddress(): String {
+//        val address = ethereum.getEthAccounts()
+//
+//    }
+//
+//    suspend fun getBalance(address: String): String = withContext(Dispatchers.IO) {
+//
+//    }
+//
+//    fun isConnected(): Boolean {
+//        return true
+//    }
 
 
 }
 
-data class Wallet(val address: String)
